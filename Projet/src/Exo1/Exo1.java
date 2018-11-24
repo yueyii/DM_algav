@@ -8,66 +8,46 @@ public class Exo1 {
 		System.out.println("Working Directory = " +
 	              System.getProperty("user.dir"));
 		String pathKeyFile=System.getProperty("user.dir")+"\\cles_alea\\";
-		pathKeyFile =pathKeyFile+ "jeu_1_nb_cles_50000.txt";
-		System.out.println(pathKeyFile);
+		String pathKeyFile1 =pathKeyFile+ "yueyi_test.txt";
+		String pathKeyFile2 =pathKeyFile+ "yueyi_test2.txt";
+
+		ArrayList<Key> keys2 = new ArrayList<Key>();		
 		ArrayList<Key> keys = new ArrayList<Key>();
 		try {
-			keys=Key.getKeysFromFile(pathKeyFile);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		//Key.displayArrayOfKeys(keys); 
-		//comparer les deux cles 
-		
-		//declarer un nouveau TasMin
-		int size=keys.size();
-		int parentIndex=0;
-		int childIndex=0;
-		TasMinTableau t=new TasMinTableau(size,parentIndex,childIndex); 
-		
-		//consIter 
-		t.consIter(keys,0);
-		
-		//convertir le string a Int pour ajouter
-		String var="0x00000000000000000000000000000007";
-		int[] newkey = new int[4]; 
-		newkey=Key.convertingLineToArrayInt(var);
-		Key newKey=new Key(newkey);
-		t.Add(keys, newKey);
-		
-		//suppMin
-		t.RemoveMin(keys);
-		
-		//Union de deux TasMin
-		System.out.println("Working Directory = " +
-	              System.getProperty("user.dir"));
-		String pathKeyFile2=System.getProperty("user.dir")+"\\cles_alea\\";
-		pathKeyFile2 =pathKeyFile2+ "jeu_2_nb_cles_50000.txt";
-		System.out.println(pathKeyFile2);
-		
-		ArrayList<Key> keys2 = new ArrayList<Key>();
-		try {
+			keys=Key.getKeysFromFile(pathKeyFile1);
 			keys2=Key.getKeysFromFile(pathKeyFile2);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		t.Union(keys,keys2);
-		Key.displayArrayOfKeys(keys); 
+		//Key.displayArrayOfKeys(keys); 
+		//comparer les deux cles 
+		Key.inf(keys2.get(0), keys.get(1));
+		Key.eg(keys2.get(0), keys.get(1));
 		
-		/*tas min arbre*/
-		/*
-		TreeTM quatre=new TreeTM(4, null, null);
-		TreeTM cinq=new TreeTM(5, null, null);
-		TreeTM trois=new TreeTM(3, cinq, null);
-		TreeTM deux=new TreeTM(2, trois, quatre);
+		//declarer un nouveau TasMin
+		int size=keys.size();
+		int parentIndex=0;
+		int childIndex=0;
+		TasMinTableau2 t=new TasMinTableau2(size,parentIndex,childIndex); 
 		
-		TreeTM.levelOrder(deux);
-		 */
+		//consIter 
+		t=TasMinTableau2.constIter(keys);
+		Key.displayArrayOfKeys(t.getTasMin());
+		t.supprimerMin();
+		t.supprimerMin();
+		Key.displayArrayOfKeys(t.getTasMin());
 		
+		//union
+		t.setTasMin(TasMinTableau2.union(keys, keys2));
 		
+		//ajout
+		String var="0x00000000000000000000000000000007";
+		int[] newkey = new int[4]; 
+		//convertir le string a Int pour ajouter
+		newkey=Key.convertingLineToArrayInt(var);
+		Key newKey=new Key(newkey);
+		t.ajout(newKey);
 	}
 
 }
