@@ -45,7 +45,6 @@ public class Key {
 	}
 
 	public static boolean inf(Key key1, Key key2) {
-
 		int[] keyRep1 = key1.getKey();
 		int[] keyRep2 = key2.getKey();
 		int index;

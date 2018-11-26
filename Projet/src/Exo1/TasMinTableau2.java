@@ -8,7 +8,7 @@ public class TasMinTableau2 {
 	int parentIndex;//le noeud parent
 	int childIndex;//le noeud fils
 	ArrayList<Key> tasMin;
-	int cmp=0;
+	static int cmp=0;
 
 	public  TasMinTableau2(int size, int parentIndex,int childIndex) {
 		this.size=size;
@@ -45,13 +45,18 @@ public class TasMinTableau2 {
 	}
 	
 	//Union deux tas
-	public static ArrayList<Key>  union(ArrayList<Key> keys1, ArrayList<Key>keys2){
+	public static ArrayList<Key> union(ArrayList<Key> keys1, ArrayList<Key>keys2){
 		ArrayList<Key> result= new ArrayList<>();
 		//ajouter tous les elements dans keys1
+		//long startTime = System.nanoTime();
 		keys1.addAll(keys2);
 		//consIter keys1
 		TasMinTableau2 tasminTmp=constIter(keys1);
 		result=tasminTmp.getTasMin();
+		//long endTime=System.nanoTime(); 
+		//System.out.println("compteur" + cmp);
+		//System.out.println("temps d'execution: " + (endTime - startTime) + "NanoSecond"); 
+		//System.out.println("temps d'execution en moy: " + ((endTime - startTime)/cmp) + "NanoSecond");
 		return result;
 		
 	}
@@ -91,15 +96,24 @@ public class TasMinTableau2 {
 				tasMin.set(parentIndex, tasMin.get(childIndex));
 				tasMin.set(childIndex,tmp);
 				childIndex=parentIndex;
+				
+				//compter le nombre operateur
+				cmp++;
 			}
 	}
 
 //ajouter successfivement element dans tasMin
 	public static TasMinTableau2 constIter(ArrayList<Key> keys) {
 		TasMinTableau2 result = new TasMinTableau2();
+		long startTime = System.nanoTime(); 
 		for (int i = 0; i <keys.size(); i++) {
 			result.ajout(keys.get(i));
+			cmp++;
 		}
+		long endTime=System.nanoTime(); 
+		System.out.println("compteur" + cmp);
+		System.out.println("temps d'execution: " + (endTime - startTime) + "NanoSecond"); 
+		System.out.println("temps d'execution en moy: " + ((endTime - startTime)/cmp) + "NanoSecond");
 		return result;
 	}
 
