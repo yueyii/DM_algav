@@ -1,158 +1,178 @@
-package Exo1;
+package Exo1BigInterger;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 
 public class Key {
+	BigInteger key;
 
-
-	//une cl¨¦ est repr¨¦sent par 4 entiers
-	//ici, le bit au poid faible se trouve? l'index 0
-	int[] key;
-	public static final int SIZE=4;
-	public static final int LINE_SIZE=32;
-	public static final int INT_HEX_REP_SIZE=8;
-	public static final String ZERO_X="0x";
-
-	//on v¨¦ifie qu'on a bien 4 int;
-	public Key(int[] key) {
-		this.key = new int[4];
-		if(isRightSize(key)) {
-			this.key=key;
-		}
-
+	public Key(BigInteger b) {
+		key=b;
 	}
 
+	public Key(Key k) {
+		key=new BigInteger(k.key.toString());
+	}
 
-	public int[] getKey() {
+	public BigInteger getKey() {
 		return key;
 	}
 
-
-	public void setKey(int[] key) {
-		this.key = new int[4];
-		if(isRightSize(key)) {
-			this.key=key;
-		}
-	}
-
-	boolean isRightSize(int[] key) {
-		return key.length == SIZE;
+	public void setKey(BigInteger b) {
+		this.key=b;
 	}
 
 	public static boolean inf(Key key1, Key key2) {
-		int[] keyRep1 = key1.getKey();
-		int[] keyRep2 = key2.getKey();
-		int index;
-		//int fromLastIndex;
-		for(index=0; index < SIZE;index++) {
-			//fromLastIndex=(SIZE-1)-index;
-			if(keyRep1[index] < keyRep2[index] ) {
-				return true;
-			}
+		BigInteger keyRep1 = key1.getKey();
+		BigInteger keyRep2 = key2.getKey();
+
+		if(keyRep1.compareTo(keyRep2)<0) {
+			return true;
 		}
 		return false;
 	}
 
 	public static boolean eg(Key key1, Key key2) {
+		BigInteger keyRep1 = key1.getKey();
+		BigInteger keyRep2 = key2.getKey();
 
-		
-		int[] keyRep1 = key1.getKey();
-		int[] keyRep2 = key2.getKey();
-		int index;
-		//int fromLastIndex;
-		for(index=0; index < SIZE;index++) {
-			//fromLastIndex=(SIZE-1)-index;
-			if(keyRep1[index] != keyRep2[index] ) {
-				return false;
-			}
+		if(keyRep1.compareTo(keyRep2)==0)
+		{
+			return true;
 		}
-		return true;
+
+		return false;
 	}
-	
-	//remplir les zeros pour les cles moins de 32 caractere
-	static String fillLineOfzero( String line) {
-		String result=line;
-		//System.out.println(result);
-		int missed=LINE_SIZE-line.length();
-		for (int i = 0; i < missed; i++) {
-			result='0'+result;
+
+	public static ArrayList<Key> getKeysFromFile(String pathKeyFile) throws Exception {
+		ArrayList<Key> result = new ArrayList<Key>();
+		List<String> lines = Files.readAllLines(Paths.get(pathKeyFile),Charset.defaultCharset());
+
+		for (String line : lines) {
+			BigInteger key = new BigInteger(line.substring(2), 16);
+
+			result.add(new Key(key));
 		}
-		//System.out.println(result);
+
 		return result;
 	} 
+
+
+	@Override
+	public String toString() {
+		return key.toString(16);
+	}
+	// on aimerait comparer les biginteger et non les classes
 	
-	public static ArrayList<Key> getKeysFromFile(String pathKeyFile) throws Exception {
+	@Override
+	public boolean equals(Object obj) {
+		Key objkey=(Key) obj;
+		return objkey.key.toString().equals(this.key.toString());
+	}
+
+	/*------------------MD5------------------------*/
+	//Lire le fichier et encoder chaque ligne par MD5, les convertir aux cles
+	public static ArrayList<Key> getKeysFromFileMD5(String pathKeyFile) throws Exception {
 		ArrayList<Key> result = new ArrayList<Key>();
 		List<String> lines = Files.readAllLines(Paths.get(pathKeyFile),Charset.defaultCharset() );
 
 		for (String line : lines) {
-			int[] key = new int[4];
-			key=convertingLineToArrayInt(line);
-			
-			result.add(new Key(key));
+			String str=MD5.getInstance().getMD5(line);
+			//stoccker les cles dans un tableau
+			Key key= new Key(new BigInteger(str,16));
+			result.add(key);
 		}
 		return result;
 	}
 
+	//filter le fichier pour que chaque mot n'appait qu'une seule fois
+	public static void writeStringToFile(String filePath) throws IOException {  
+		List<String> lines = Files.readAllLines(Paths.get(filePath),Charset.defaultCharset() );
+		//liste de mots
+		Set<String> set=new HashSet<String>();
+		set.addAll(lines);
+		try {  
+			//stocker les r¨¦sultat dans un nouveau fichier
+			File file =new File("E:\\eclipse\\java2018\\workspeace-java\\Projet\\Shakespeare\\test.txt");
+			FileOutputStream fos = new FileOutputStream(file);
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
 
-	//on utilise biginteger pour convertir  les 8 characteres HEX en INT ( on note que le bigint est bien 32 bits)
-	public static int parseFrom8CharHex(String hexas){
-		BigInteger bi= new BigInteger(hexas,16);
-		return  bi.intValue();  
+			for (String line : set) {
+				bw.write(line);
+				bw.newLine();
+			}
+			bw.close();
 
-	}
-	
-	public static int[] convertingLineToArrayInt(String line) {
+		} catch (FileNotFoundException e) {   
+			e.printStackTrace();  
+		}  
+	} 
+	//Pour la question 6.13
+	public static Map<String,Integer> fillMapMD5(String pathFile) throws IOException{
+		List<String> lines = Files.readAllLines(Paths.get(pathFile),Charset.defaultCharset() );
+		String[] array=new String[lines.size()];
+		int k=0;
+		Map<String,Integer> map = new HashMap<>(); 
+		for (String line : lines) {
+			//MD5
+			String str=MD5.getInstance().getMD5(line);
+			//stocker les string dans un array
+			array[k]= str;
 
-		int deb;
-		int fin;
-		int[] result = new int[4];
-		int index;
-		String hexaLine=line.substring(ZERO_X.length());
-
-		//on compare bien si la ligne repr¨¦sente bien 128 bits, sans le "0x"
-	
-		
-		//prends les premier 32 caracteres, sauf le "0x"
-		if(hexaLine.length() < LINE_SIZE)
-		{
-			hexaLine=fillLineOfzero(hexaLine);
-			//System.out.println(hexaLine.length());
+			//Pair<Integer, ArrayList<String>> couple ;
+			//si une linge apparait plusieurs fois, on faire augmenter le cmpt
+			if(map.containsKey(str)) {
+				map.put(str, map.get(str)+1);	
+			}
+			else {
+				map.put(str, 1);	
+			}
+			k++;
 		}
-		for(index=0; index < SIZE;index++) {
-			deb=index*INT_HEX_REP_SIZE;
-			fin=deb+INT_HEX_REP_SIZE;
-			//fromLastIndex=(SIZE-1)-index;
+		return map;
+	}
 
-			result[index]=parseFrom8CharHex(hexaLine.substring(deb,fin));
-			
+	//Afficher les Map de MD5
+	public static void displayMapMD5(Map<String,Integer> md5Map) {
+		for (Map.Entry<String, Integer> entry  : md5Map.entrySet()) {
+			System.out.println(entry.getKey()+ " : " + entry.getValue());
+		}
+	}
+
+	//verifier les collisions
+	public static void displayCollisionMapMD5(Map<String,Integer> md5Map) {
+		for (Map.Entry<String, Integer> entry  : md5Map.entrySet()) {
+			if(entry.getValue()>1) {
+				System.out.println(entry.getKey()+ " : " + entry.getValue());
+			}
+		}
+	}
+
+	// Lire tous les fichiers dans la repetoire
+	public static ArrayList<String> getAllFilesFromPath(String  path) {
+		System.out.println(path);
+		File folder = new File(path);
+		ArrayList<String> result= new ArrayList<>();
+		for(File fileEntry : folder.listFiles()) {
+			System.out.println(fileEntry.getName());
+			result.add(fileEntry.getName());
 		}
 		return result;
-	};
-	
-	public void showIntsOfKey() {
-		StringBuilder sb= new StringBuilder();
-		for(int index = 0 ; index < SIZE; index ++) {
-			sb.append("--index-> "+index+ ":"+key[index] +" \n");
-			
-		} 
-		System.out.println(sb.toString());
 	}
-	
-	public static void displayArrayOfKeys(ArrayList<Key>  keys) {
-		int index= 0;
-		for (Key key : keys) {
-			System.out.println("key n"+ index);
-			key.showIntsOfKey();
-			index++;
-		}		
-	}
-
-
 
 }

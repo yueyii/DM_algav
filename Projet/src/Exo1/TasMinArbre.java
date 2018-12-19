@@ -1,4 +1,4 @@
-package Exo1;
+package Exo1BigInterger;
 
 import java.util.LinkedList;
 
